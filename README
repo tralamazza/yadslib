@@ -1,0 +1,9 @@
+Warning: These are simple data structures, not optimized at all. I am doing this project to dust off my C++ and practice some college grade data structures.
+
+
+Data structures I want to include here:
+
+* BST (done)
+* Skip list
+* Treap
+* Suffix Tree (maybe suffix array)
