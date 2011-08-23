@@ -17,6 +17,7 @@
 #include <iterator>
 #include <memory>
 
+namespace yadslib {
 
 template <typename _Key, typename _Alloc = std::allocator<_Key> >
 class binary_search_tree {
@@ -64,7 +65,7 @@ private:
 					io_node = io_node->left();
 				return io_node; // get the left most
 			} else { // right kid is null
-				// while io_node is not root and is different from it's parent left edge
+				// while io_node is not root and is different from its parent left edge
 				while ( io_node->parent != NULL && (io_node != io_node->parent->left()) ) {
 					io_node = io_node->parent; // go up
 				}
@@ -159,20 +160,26 @@ public:
 		if (n == NULL)
 			return 0; // not found
 		node* pn = n->parent; // n's parent
-		if (pn == NULL) // only root has no parent
-			pn = n; // special case
 		node* rn = n->right(); // n's right kid
 		if (rn == NULL) {
 			// n has no right kid
 			if (n->left()) // if n's left is valid
 				n->left()->parent = pn; // set its parent to p
-			pn->edge[dir] = n->left(); // p links to n's left
+			if (pn)
+				pn->edge[dir] = n->left(); // p links to n's lef
+			else
+				root = n->left();
 		} else {
 			if (rn->left() == NULL) {
 				// n's right kid has no left kid
 				rn->left(n->left()); // right kid inherit n's left
+				if (rn->left()) // set our new left kid rn as parent
+					rn->left()->parent = rn;
 				rn->parent = pn; // set right kid's parent to p
-				pn->edge[dir] = rn; // p links to right kid
+				if (pn)
+					pn->edge[dir] = rn; // p links to right kid
+				else
+					root = rn;
 			} else {
 				// n's right kid has a left kid
 				node* ln = rn->left();
@@ -269,5 +276,7 @@ private:
 		return n;
 	}
 };
+
+}; // namespace
 
 #endif /* BST_H_ */
