@@ -116,7 +116,7 @@ public:
 
 	bool empty() const { return m_size == 0; }
 
-	void clear() { destroy_node_descendants(root); }
+	void clear() { if (root) destroy_node_descendants(root); }
 
 	std::pair<iterator, bool> insert(const_reference x) {
 		// special case root is null
