@@ -12,6 +12,7 @@
 #ifndef BST_H_
 #define BST_H_
 
+#include <iostream>
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
@@ -37,6 +38,16 @@ private:
 		bool operator==(const_reference other) const { return data == other.data; }
 		bool operator!=(const_reference other) const { return data != other.data; }
 		bool operator<(const_reference other) const { return data < other.data; }
+		static pointer left_most(pointer pnode) {
+			while (pnode->left())
+				pnode = pnode->left();
+			return pnode;
+		}
+		static pointer right_most(pointer pnode) {
+			while (pnode->right())
+				pnode = pnode->right();
+			return pnode;
+		}
 	};
 
 	// in order tree traversal
@@ -47,9 +58,7 @@ private:
 	protected:
 		inorder_traversal(node* _node, bool _from_start) : io_node(_node) {
 			if (io_node && _from_start) {
-				// find the left most
-				while (io_node->left())
-					io_node = io_node->left();
+				io_node = node::left_most(io_node);
 			}
 		}
 
@@ -60,9 +69,7 @@ private:
 				return NULL; // trivial case
 			if (io_node->right()) {
 				// node has a right kid
-				io_node = io_node->right(); // go down right
-				while (io_node->left())
-					io_node = io_node->left();
+				io_node = node::left_most(io_node->right()); // go down right and
 				return io_node; // get the left most
 			} else { // right kid is null
 				// while io_node is not root and is different from its parent left edge
@@ -90,6 +97,7 @@ public:
 	template <class TraversalPolicy>
 	class node_iterator : public TraversalPolicy, std::iterator<std::forward_iterator_tag, _Key> {
 	public:
+		//node_iterator(const node_iterator& _it) : TraversalPolicy(_it.pnode, false), pnode(_it.pnode) {	}
 		node_iterator(node* _node, bool _from_start) : TraversalPolicy(_node, _from_start) {
 			pnode = this->current();
 		}
@@ -99,15 +107,13 @@ public:
 		bool operator!=(const node_iterator& other) { return !(*this == other); }
 		node_iterator& operator++() { pnode = this->successor(); return *this; }
 		node_iterator& operator--() { pnode = this->predecessor(); return *this; }
-		const _Key& operator*() const { return pnode->data; }
-		const _Key* operator->() const { return &pnode->data; }
+		typename node_iterator::reference operator*() const { return pnode->data; }
+		typename node_iterator::pointer operator->() const { return &pnode->data; }
 	private:
 		node* pnode;
 	};
 
 	typedef node_iterator<inorder_traversal> iterator;
-	typedef node_iterator<inorder_traversal> const_iterator;
-
 
 	binary_search_tree() : root(NULL), m_size(0) { }
 	~binary_search_tree() { clear(); }
@@ -182,9 +188,7 @@ public:
 					root = rn;
 			} else {
 				// n's right kid has a left kid
-				node* ln = rn->left();
-				while (ln->left())
-					ln = ln->left(); // find left most descendant
+				node* ln = node::left_most(rn->left()); // find left most descendant
 				// reassign ln's right kid
 				ln->parent->left(ln->right()); // ln's parent left points to ln's right
 				if (ln->right()) // if ln has a right kid
@@ -217,14 +221,12 @@ public:
 	iterator end() const { return iterator(NULL, false); }
 
 	const_reference min() const {
-		node* n = root;
-		while (n->left()) n = n->left();
+		node* n = node::left_most(root);
 		return n->data;
 	}
 
 	const_reference max() const {
-		node* n = root;
-		while (n->right()) n = n->right();
+		node* n = node::right_most(root);
 		return n->data;
 	}
 
